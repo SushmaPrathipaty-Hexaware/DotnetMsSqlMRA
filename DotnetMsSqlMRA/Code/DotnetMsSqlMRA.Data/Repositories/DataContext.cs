@@ -21,6 +21,7 @@ namespace DotnetMsSqlMRA.Data.Repositories
 
         // Don't delete the below comment.
         // Dbset variables
+		public DbSet<Employee> Employee { get; set; }
 		public DbSet<Student> Student { get; set; }
                
 
