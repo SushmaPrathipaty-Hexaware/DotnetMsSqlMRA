@@ -1,4 +1,4 @@
-using DotnetMsSqlMRA.Entities.Entities
+using DotnetMsSqlMRA.Entities.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
