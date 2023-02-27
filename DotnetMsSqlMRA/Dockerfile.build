@@ -1,0 +1,23 @@
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+WORKDIR /src
+COPY ["Code/DotnetMsSqlMRA.Api/DotnetMsSqlMRA.Api.csproj", "Code/DotnetMsSqlMRA.Api/"]
+COPY ["Code/DotnetMsSqlMRA.Business/DotnetMsSqlMRA.Business.csproj", "Code/DotnetMsSqlMRA.Business/"]
+COPY ["Code/DotnetMsSqlMRA.Data/DotnetMsSqlMRA.Data.csproj", "Code/DotnetMsSqlMRA.Data/"]
+COPY ["Code/DotnetMsSqlMRA.Entities/DotnetMsSqlMRA.Entities.csproj", "Code/DotnetMsSqlMRA.Entities/"]
+COPY ["Code/DotnetMsSqlMRA.Test.Api/DotnetMsSqlMRA.Test.Api.csproj", "Code/DotnetMsSqlMRA.Test.Api/"]
+COPY ["Code/DotnetMsSqlMRA.Test.Business/DotnetMsSqlMRA.Test.Business.csproj", "Code/DotnetMsSqlMRA.Test.Business/"]
+RUN dotnet restore "Code/DotnetMsSqlMRA.Api/DotnetMsSqlMRA.Api.csproj"
+COPY . .
+WORKDIR "/src/Code/DotnetMsSqlMRA.Api"
+RUN dotnet build "DotnetMsSqlMRA.Api.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "DotnetMsSqlMRA.Api.csproj" -c Release -o /app/publish
+
+WORKDIR /src
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/DotnetMsSqlMRA.Test.Api/DotnetMsSqlMRA.Test.Api.csproj"
+RUN dotnet test --results-directory /testresults --logger "trx;LogFileName=testresults.Api.trx" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=/testresults/coverage/ /p:MergeWith=/testresults/coverage/coverage.json "Code/DotnetMsSqlMRA.Test.Business/DotnetMsSqlMRA.Test.Business.csproj"
